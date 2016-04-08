@@ -5,7 +5,7 @@
 
 // WiFi settings
 char ssid[] = "iPhone van Heleen";
-char pass[] = "ribose7866";
+char pass[] = "";
 int status = WL_IDLE_STATUS;
 WiFiClient  client;
 
