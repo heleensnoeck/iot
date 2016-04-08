@@ -9,8 +9,8 @@ char pass[] = "ribose7866";
 int status = WL_IDLE_STATUS;
 WiFiClient  client;
 
-long myChannelNumber = 106563; // Set channel number
-const char * myWriteAPIKey = "JY7EPBOMYCOQSP72"; // Set api key that points to a memory adress
+long myChannelNumber = ; // Set channel number
+const char * myWriteAPIKey = ""; // Set api key that points to a memory adress
 
 void setup() {
   // Setup wifi
