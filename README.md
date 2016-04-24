@@ -367,5 +367,194 @@ buttonState = digitalRead(buttonPin);
 }
  
 ```
+
 # Part 3: JSON & PHP
-for
+Creat the following files in a folder. 
+- index.php
+- redOne.php
+- led.json
+- button.json
+- output.json
+- style.css
+- and ofcours you arduino file
+
+####led.json
+The led.json file is simple. It eather reads 
+```{"sitting": "true"}``` or ```{"sitting": "false"}```.
+
+####index.php
+The index.php file is the file that writes ```{"sitting": "true"}``` or ```{"sitting": "false"}```to the led.json. 
+
+The same thing happens to the button.json file. 
+
+//Deze tekst gebruiken als ik die slide button heb toegevoegd
+//That links you to the current page with a url parameter:. 
+//This parameter tells the server witch file to load.
+
+The led.json file tells the sever witch page he has to load
+
+```
+ <?php  if ($status == "Sitting") { ?>
+             sitting page load
+    <?php } else  { ?>
+    			standing page loads
+  <?php } ?>
+
+```
+
+I have writen some html code between the php if else statement from above. You can ofcourse write your owen html page. 
+
+#### POST handeling
+When a post request is fired the index.php file opens the button.json file en the led.json file. Then he writes to both files ```{"sitting": "false"}``` this is because we dont know if somebody is sitting or not when he just enters our web page. Then at last we close the led.json file, and go on with the button.json file.
+
+```
+   $file = fopen("button.json", "w") or die("can't open file");    
+   $led = fopen("led.json", "w") or die("can't open file");      
+   fwrite($led, '{"sitting": "false"}');         
+   fclose($led);   
+```
+
+After declare a variable ```$data = $_POST["sitting"];```
+Her the button data that comes in wil be written to output.txt ```file_put_contents("output.txt", $data . "\n"); ```
+
+Then we ask if the data is true or false. is the data is true write ```fwrite($file, '{"sitting": "true"}');``` to output.txt close the file and get the content from ```file_get_contents('http://www.yourUrl.com/yourPath/readOne.php```
+
+```
+<?php
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+        $file = fopen("button.json", "w") or die("can't open file"); 
+        $led = fopen("led.json", "w") or die("can't open file");        
+        fwrite($led, '{"sitting": "false"}');        fclose($led);
+            
+        // init
+        $data = $_POST["sitting"];
+        file_put_contents("output.txt", $data . "\n"); // de button data = de post die je binnen krijgt word in de output.txt gezet
+    
+        if($data == "true"){ // als de server iets binnen krijgt schrijf hem dan we in readOne.
+                
+                // setTimeout
+                fwrite($file, '{"sitting": "true"}');
+                fclose($file);    
+
+                file_get_contents('http://www.spotitshopit.com/iot_eindopdracht/redOne.php');
+        
+        } else if ($data == "false") {
+        
+            // Set light to red
+            fwrite($file, '{"sitting": "false"}');
+            fclose($file);
+            
+        }    
+    }
+?>
+```
+
+#### ```redOne.php```
+In red one we say wait for 10 seconds before continuing the next script. It is now 10 seconds because we want to see if it works. But when you want to use your project set it for 2 hours. Then the red light wil go on after 2 hours and you know you need to take a break. 
+
+```
+<?php            
+    sleep(10);
+    
+    $file = fopen("led.json", "w") or die("can't open file"); // pakt json file        
+    fwrite($file, '{"sitting": "true"}'); // schrijf naar led.json 
+    fclose($file);
+?>
+```
+
+#Part 4: write some html
+Build some cool html page and pass it in the index.php file (between the main tages).
+See index.php code ->. 
+
+
+###Here is the final code for ```index.php```:
+
+```
+<?php
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+        $file = fopen("button.json", "w") or die("can't open file"); // pakt json file
+        $led = fopen("led.json", "w") or die("can't open file"); // pakt json file        
+        fwrite($led, '{"sitting": "false"}'); // je weet nog niet of hij zit of beweegt dus doe niks
+        fclose($led);
+            
+        // init
+        $data = $_POST["sitting"];
+        file_put_contents("output.txt", $data . "\n"); // de button data = de post die je binnen krijgt word in de output.txt gezet
+    
+        if($data == "true"){ // als de server iets binnen krijgt schrijf hem dan we in readOne.
+                
+                // setTimeout
+                fwrite($file, '{"sitting": "true"}');
+                fclose($file);    
+
+                file_get_contents('http://www.spotitshopit.com/iot_eindopdracht/redOne.php');
+        
+        } else if ($data == "false") {
+        
+            // Set light to red
+            fwrite($file, '{"sitting": "false"}');
+            fclose($file);
+            
+        }    
+    }
+?>
+
+<html>
+ <head>      
+   <meta charset="utf-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   	 <title>Get-up Stand-up</title>
+    <link rel="stylesheet" href="style.css">  
+ </head>
+ <body>
+   <section>     
+        <?php 
+            // Open the file
+            $fp = @fopen('output.txt', 'r');
+        
+            // Add each line to an array
+            if ($fp) { 
+               $array = explode("\n", fread($fp, filesize('output.txt')));            
+            }
+            foreach ($array as $value) { // voor elke item in de array the value is true r false
+                if ( $value == "true" ) {
+                
+                    $status = "Sitting";
+
+
+                } else if ( $value == "false" ) {
+                    
+                    $status = "Standing";                    
+                    
+                }        
+            };
+        ?>
+            
+            <?php  if ($status == "Sitting") { ?>
+
+                    <main>
+                      <h1>Just</h1>    
+                      <h1>Take a break:</h1>
+                    </main>
+            
+            <?php } else  { ?>
+
+              <main>
+                <h1>Just</h1>
+                <h1>Work, one hour till break</h1>
+               </main>
+
+            <?php } ?>
+  
+ </body>
+</html>
+```
+
+
+
+
+
